@@ -1,7 +1,7 @@
-use crate::{J2000, Matrix3, PosVelState, RealField, Vector3, Vector6, impl_isomorphic};
+use crate::{J2000, Matrix3, PosVelState, RealField, Scalar, Vector3, Vector6, impl_isomorphic};
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct OrbitCoefficients<T> {
+pub struct OrbitCoefficients<T: Scalar> {
     /// Semi-major axis in `m`
     pub a: T,
     /// Eccentricity

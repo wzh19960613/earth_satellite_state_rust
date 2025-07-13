@@ -1,10 +1,14 @@
 use crate::{InverseOfSingularMatrix, Matrix3, Vector3, Vector6, vector3};
 use crate::{RealField, Scalar, impl_isomorphic};
 
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 /// Satellite state with position in `m` and velocity in `m/s` .
 #[repr(C)]
 #[derive(Debug, Clone, PartialEq)]
-pub struct PosVelState<T> {
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct PosVelState<T: Scalar> {
     /// Position in `m`
     pub pos: Vector3<T>,
     /// Velocity in `m/s`
@@ -20,7 +24,7 @@ impl<T: Scalar + Default> Default for PosVelState<T> {
     }
 }
 
-impl<T> PosVelState<T> {
+impl<T: Scalar> PosVelState<T> {
     pub const fn new(pos: Vector3<T>, vel: Vector3<T>) -> Self {
         Self { pos, vel }
     }
@@ -32,35 +36,36 @@ macro_rules! specific_pos_vel_state {
     ($name:ident) => {
         #[repr(transparent)]
         #[derive(Debug, Clone, PartialEq)]
-        pub struct $name<T>(pub PosVelState<T>);
+        #[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(transparent))]
+        pub struct $name<T: Scalar>(pub PosVelState<T>);
 
-        impl<T> From<PosVelState<T>> for $name<T> {
+        impl<T: Scalar> From<PosVelState<T>> for $name<T> {
             fn from(state: PosVelState<T>) -> Self {
                 Self(state)
             }
         }
 
-        impl<T: Clone> From<[T; 6]> for $name<T> {
+        impl<T: Scalar> From<[T; 6]> for $name<T> {
             fn from(slice: [T; 6]) -> Self {
                 let pos_vel: PosVelState<T> = slice.into();
                 Self(pos_vel)
             }
         }
 
-        impl<T> std::ops::Deref for $name<T> {
+        impl<T: Scalar> std::ops::Deref for $name<T> {
             type Target = PosVelState<T>;
             fn deref(&self) -> &Self::Target {
                 &self.0
             }
         }
 
-        impl<T> std::ops::DerefMut for $name<T> {
+        impl<T: Scalar> std::ops::DerefMut for $name<T> {
             fn deref_mut(&mut self) -> &mut Self::Target {
                 &mut self.0
             }
         }
 
-        impl<T> $name<T> {
+        impl<T: Scalar> $name<T> {
             pub const fn new(pos: Vector3<T>, vel: Vector3<T>) -> Self {
                 Self(PosVelState::new(pos, vel))
             }
