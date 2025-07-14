@@ -1,4 +1,5 @@
-use crate::{J2000, Matrix3, PosVelState, RealField, Scalar, Vector3, Vector6, impl_isomorphic};
+use crate::{J2000, Matrix3, PosVelState, RealField, Scalar, Vector3, Vector6};
+use crate::{impls, isomorphic_ref, isomorphic_transmute};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct OrbitCoefficients<T: Scalar> {
@@ -16,7 +17,8 @@ pub struct OrbitCoefficients<T: Scalar> {
     pub theta: T,
 }
 
-impl_isomorphic!(OrbitCoefficients<T> = [T; 6] | Vector6<T>);
+impls!(isomorphic_ref!(OrbitCoefficients<T> = [T; 6] | Vector6<T>));
+impls!(isomorphic_transmute!(OrbitCoefficients<T> = [T; 6] | Vector6<T>));
 
 pub trait CanBeOrbitCoefficient: RealField + Copy {
     /// Gravitational constant in `m^3/s^2`

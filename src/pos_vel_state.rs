@@ -1,5 +1,5 @@
-use crate::{InverseOfSingularMatrix, Matrix3, Vector3, Vector6, vector3};
-use crate::{RealField, Scalar, impl_isomorphic};
+use crate::{InverseOfSingularMatrix, Matrix3, RealField, Scalar, Vector3, Vector6, vector3};
+use crate::{impls, isomorphic_ref, isomorphic_transmute};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -30,7 +30,8 @@ impl<T: Scalar> PosVelState<T> {
     }
 }
 
-impl_isomorphic!(PosVelState<T> = Vector6<T> | [T; 6]);
+impls! {isomorphic_ref!(PosVelState<T> = Vector6<T> | [T; 6])}
+impls! {isomorphic_transmute!(PosVelState<T> = Vector6<T> | [T; 6])}
 
 macro_rules! specific_pos_vel_state {
     ($name:ident) => {
@@ -45,10 +46,9 @@ macro_rules! specific_pos_vel_state {
             }
         }
 
-        impl<T: Scalar> From<[T; 6]> for $name<T> {
-            fn from(slice: [T; 6]) -> Self {
-                let pos_vel: PosVelState<T> = slice.into();
-                Self(pos_vel)
+        impl<T: Scalar> From<$name<T>> for PosVelState<T> {
+            fn from(state: $name<T>) -> Self {
+                state.0
             }
         }
 
@@ -76,6 +76,9 @@ macro_rules! specific_pos_vel_state {
                 Self(PosVelState::default())
             }
         }
+
+        impls! {isomorphic_ref!($name<T> = Vector6<T> | [T; 6] | PosVelState<T>)}
+        impls! {isomorphic_transmute!($name<T> = Vector6<T> | [T; 6])}
     };
     ($($name:ident),*) => { $(specific_pos_vel_state!($name);)* };
 }
