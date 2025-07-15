@@ -1,5 +1,6 @@
-pub use nalgebra::{ComplexField, Matrix3, RealField, Scalar};
+pub use nalgebra::{RealField, Scalar};
 
+pub type Matrix3<T = f64> = nalgebra::Matrix3<T>;
 pub type Vector3<T = f64> = nalgebra::Vector3<T>;
 pub type Vector6<T = f64> = nalgebra::Vector6<T>;
 
