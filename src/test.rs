@@ -11,7 +11,7 @@ fn vec_to_slice() {
 
 #[test]
 fn sat_state_to_vec6() {
-    let mut mut_sat_state: PosVelState<_> = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0].into();
+    let mut mut_sat_state: PosVel = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0].into();
     let sat_state = mut_sat_state.clone();
     let mut_vec6 = mut_sat_state.as_mut();
     let vec6: &Vector6<_> = sat_state.as_ref();
@@ -20,8 +20,7 @@ fn sat_state_to_vec6() {
 
 #[test]
 fn sat_state_to_slice() {
-    let mut mut_sat_state =
-        PosVelState::new(Vector3::new(1.0, 2.0, 3.0), Vector3::new(4.0, 5.0, 6.0));
+    let mut mut_sat_state = PosVel::new(Vector3::new(1.0, 2.0, 3.0), Vector3::new(4.0, 5.0, 6.0));
     let sat_state = mut_sat_state.clone();
     let mut_slice: &mut [f64; 6] = mut_sat_state.as_mut();
     let slice: &[f64; 6] = sat_state.as_ref();
@@ -31,9 +30,9 @@ fn sat_state_to_slice() {
 #[test]
 fn vector3_lvlh_and_vvlh_trans() {
     let vvlh = Vector3::new(1.0, 2.0, 3.0);
-    let lvlh = vector3::lvlh_from_vvlh(vvlh);
+    let lvlh = vector3::lvlh_from_vvlh(&vvlh);
     assert_eq!(lvlh, Vector3::new(-3.0, 1.0, -2.0));
-    let vvlh_back = vector3::vvlh_from_lvlh(lvlh);
+    let vvlh_back = vector3::vvlh_from_lvlh(&lvlh);
     assert_eq!(vvlh_back, vvlh);
 }
 
@@ -105,8 +104,13 @@ fn from_lvlh_vel_to_j2000() {
         ),
     ] {
         assert_eq!(
-            vector3::try_j2000_vel_from_lvlh(lvlh.into(), &ref_state).unwrap(),
+            vector3::try_j2000_vel_from_lvlh(vector3::ref_from_array(&lvlh), &ref_state).unwrap(),
             Vector3::from(j2000)
         );
     }
+}
+
+#[test]
+fn norm_a_zero() {
+    println!("{:?}", Vector3::<f64>::default().normalize());
 }

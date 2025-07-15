@@ -25,12 +25,19 @@ checksum = "5c76a5792e44e4abe34d3abf15636779261d45a7450612059293d1d2cfc63422"
 
 [[package]]
 name = "earth_satellite_state"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
+ "isomorphic",
  "nalgebra",
  "serde",
  "thiserror",
 ]
+
+[[package]]
+name = "isomorphic"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f80a63adea42cd346361191c13f86025d90d9ae031fad9950f78f1d30f9db8c0"
 
 [[package]]
 name = "matrixmultiply"
