@@ -98,11 +98,9 @@ specific!(PosVel => J2000 | LVLH | VVLH);
 
 impl<T: RealField + Copy> J2000<T> {
     pub fn try_from_lvlh(lvlh: LVLH<T>, ref_state: &Self) -> Result<Self, MatrixError> {
-        let rou_ref = &ref_state.pos;
-        let vel_ref = &ref_state.vel;
-        let rou_norm = vector3::norm_not_zero(rou_ref)?;
-        let rou_hat = rou_ref / rou_norm;
-        let h = rou_ref.cross(vel_ref);
+        let rou_norm = vector3::norm_not_zero(&ref_state.pos)?;
+        let rou_hat = ref_state.pos / rou_norm;
+        let h = ref_state.pos.cross(&ref_state.vel);
         let h_hat = vector3::normalize(&h)?;
         let a = Matrix3::from_columns(&[rou_hat, h_hat.cross(&rou_hat), h_hat]).transpose();
         let inv_a = a.try_inverse().ok_or(MatrixError::InverseSingular)?;
@@ -110,8 +108,8 @@ impl<T: RealField + Copy> J2000<T> {
         let [x, y, z] = vector3::to_array(h / (rou_norm * rou_norm));
         let zero = T::zero();
         let omega_w = Matrix3::from_row_slice(&[zero, -z, y, z, zero, -x, -y, x, zero]);
-        let vel_j2000 = vel_ref + inv_a * (lvlh.vel + a * omega_w * lvlh_pos_j2000);
-        Ok(J2000::new(rou_ref + lvlh_pos_j2000, vel_j2000))
+        let vel_j2000 = ref_state.vel + inv_a * (lvlh.vel + a * omega_w * lvlh_pos_j2000);
+        Ok(J2000::new(ref_state.pos + lvlh_pos_j2000, vel_j2000))
     }
 
     pub fn try_from_vvlh(vvlh: VVLH<T>, ref_state: &Self) -> Result<Self, MatrixError> {
@@ -121,18 +119,16 @@ impl<T: RealField + Copy> J2000<T> {
 
 impl<T: RealField + Copy> LVLH<T> {
     pub fn try_from_j2000(j2000: J2000<T>, ref_state: &J2000<T>) -> Result<Self, MatrixError> {
-        let rou_ref = &ref_state.pos;
-        let vel_ref = &ref_state.vel;
-        let rou_norm = vector3::norm_not_zero(rou_ref)?;
-        let rou_hat = rou_ref / rou_norm;
-        let h = rou_ref.cross(vel_ref);
-        let h_hat = vector3::normalize(&h)?;
+        let rou_norm = vector3::norm_not_zero(&ref_state.pos)?;
+        let rou_hat = ref_state.pos / rou_norm;
+        let h = &ref_state.pos.cross(&ref_state.vel);
+        let h_hat = vector3::normalize(h)?;
         let a = Matrix3::from_columns(&[rou_hat, h_hat.cross(&rou_hat), h_hat]).transpose();
         let [x, y, z] = vector3::to_array(h / (rou_norm * rou_norm));
         let zero = T::zero();
         let omega_w = Matrix3::from_row_slice(&[zero, -z, y, z, zero, -x, -y, x, zero]);
-        let rou_rel = j2000.pos - rou_ref;
-        let lvlh_vel = a * (j2000.vel - vel_ref - omega_w * rou_rel);
+        let rou_rel = j2000.pos - ref_state.pos;
+        let lvlh_vel = a * (j2000.vel - ref_state.vel - omega_w * rou_rel);
         Ok(LVLH::new(a * rou_rel, lvlh_vel))
     }
 }

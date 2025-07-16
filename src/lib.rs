@@ -4,7 +4,7 @@ pub type Matrix3<T = f64> = nalgebra::Matrix3<T>;
 pub type Vector3<T = f64> = nalgebra::Vector3<T>;
 pub type Vector6<T = f64> = nalgebra::Vector6<T>;
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, Clone, thiserror::Error)]
 pub enum MatrixError {
     #[error("Try to inverse a singular matrix")]
     InverseSingular,
